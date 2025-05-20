@@ -129,7 +129,7 @@
 </head>
 <body>
 
-  <audio id="bgMusic" src="music/high_low.mp3" loop></audio>
+  <audio id="bgMusic" src="../music/high_low.mp3" loop></audio>
 
   <canvas class="weather"></canvas>
 
@@ -137,7 +137,7 @@
 
   <div class="progress-bar"><div class="progress"></div></div>
 
-  <button class="skip-btn">Bỏ qua</button>
+  <button class="skip-btn">❤️</button>
 
   <script>
     const userName = localStorage.getItem('userName') || "Bạn";
@@ -146,18 +146,18 @@
     const birthdayMonth = birthday.getMonth();
 
     const months = [
-      { name: "Tháng 1", image: "img/anh2.jpg" },
-      { name: "Tháng 2", image: "img/anh11.jpg" },
-      { name: "Tháng 3", image: "img/anh9.jpg" },
-      { name: "Tháng 4", image: "img/anh8.jpg" },
-      { name: "Tháng 5", image: "img/anh12.jpg" },
-      { name: "Tháng 6", image: "img/anh5.jpg" },
-      { name: "Tháng 7", image: "img/hlu2.jpg" },
-      { name: "Tháng 8", image: "img/anh6.jpg" },
-      { name: "Tháng 9", image: "img/anh7.jpg" },
-      { name: "Tháng 10", image: "img/anh1.jpg" },
-      { name: "Tháng 11", image: "img/anh3.jpg" },
-      { name: "Tháng 12", image: "img/anh10.jpg" }
+      { name: "Tháng 1", image: "../img/anh1.jpg" },
+      { name: "Tháng 2", image: "../img/anh11.jpg" },
+      { name: "Tháng 3", image: "../img/anh9.jpg" },
+      { name: "Tháng 4", image: "../img/anh8.jpg" },
+      { name: "Tháng 5", image: "../img/anh12.jpg" },
+      { name: "Tháng 6", image: "../img/anh5.jpg" },
+      { name: "Tháng 7", image: "../img/hlu2.jpg" },
+      { name: "Tháng 8", image: "../img/anh6.jpg" },
+      { name: "Tháng 9", image: "../img/anh7.jpg" },
+      { name: "Tháng 10", image: "../img/anh1.jpg" },
+      { name: "Tháng 11", image: "../img/anh3.jpg" },
+      { name: "Tháng 12", image: "../img/anh10.jpg" }
     ];
 
     const container = document.querySelector('.month-container');
