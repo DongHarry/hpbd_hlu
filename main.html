@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Chúc Mừng Sinh Nhật</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: #0a0a0a;
+      color: white;
+      margin: 0;
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .month-container {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+
+    .month {
+      position: absolute;
+      text-align: center;
+      opacity: 0;
+      transform: scale(1.2);
+      transition: all 3s ease-in-out;
+    }
+
+    .month.active {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .month-name {
+      font-size: 3rem;
+      margin-bottom: 20px;
+      color: #ff6b6b;
+    }
+
+    .month-image {
+      width: 200px;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+
+    .progress-bar {
+      width: 80%;
+      height: 5px;
+      background-color: #333;
+      margin-top: 30px;
+      border-radius: 5px;
+      overflow: hidden;
+      z-index: 2;
+    }
+
+    .progress {
+      height: 100%;
+      background-color: #ff6b6b;
+      width: 0%;
+      transition: width 0.5s ease;
+    }
+
+    .skip-btn {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background-color: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      z-index: 2;
+    }
+
+    canvas.weather {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    @keyframes zoomInBirthday {
+      0%, 100% {
+        transform: scale(1);
+      }
+      20% {
+        transform: scale(1.3);
+      }
+      40% {
+        transform: scale(1.2);
+      }
+      50% {
+        transform: scale(0.95);
+      }
+      60% {
+        transform: scale(1.3);
+      }
+      75% {
+        transform: scale(1.1);
+      }
+    }
+
+    .birthday-zoom .month-image {
+      animation: zoomInBirthday 5s ease-in-out infinite;
+      transform-origin: center center;
+      z-index: 5;
+      position: relative;
+    }
+
+
+  </style>
+</head>
+<body>
+
+  <audio id="bgMusic" src="music/high_low.mp3" loop></audio>
+
+  <canvas class="weather"></canvas>
+
+  <div class="month-container"></div>
+
+  <div class="progress-bar"><div class="progress"></div></div>
+
+  <button class="skip-btn">Bỏ qua</button>
+
+  <script>
+    const userName = localStorage.getItem('userName') || "Bạn";
+    const birthday = new Date(localStorage.getItem('birthday') || new Date());
+    const currentMonth = new Date().getMonth();
+    const birthdayMonth = birthday.getMonth();
+
+    const months = [
+      { name: "Tháng 1", image: "img/anh2.jpg" },
+      { name: "Tháng 2", image: "img/anh11.jpg" },
+      { name: "Tháng 3", image: "img/anh9.jpg" },
+      { name: "Tháng 4", image: "img/anh8.jpg" },
+      { name: "Tháng 5", image: "img/anh12.jpg" },
+      { name: "Tháng 6", image: "img/anh5.jpg" },
+      { name: "Tháng 7", image: "img/hlu2.jpg" },
+      { name: "Tháng 8", image: "img/anh6.jpg" },
+      { name: "Tháng 9", image: "img/anh7.jpg" },
+      { name: "Tháng 10", image: "img/anh1.jpg" },
+      { name: "Tháng 11", image: "img/anh3.jpg" },
+      { name: "Tháng 12", image: "img/anh10.jpg" }
+    ];
+
+    const container = document.querySelector('.month-container');
+    const progressBar = document.querySelector('.progress');
+    const skipBtn = document.querySelector('.skip-btn');
+    const canvas = document.querySelector('.weather');
+    const ctx = canvas.getContext('2d');
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Tạo các phần tử tháng
+    months.forEach((month, index) => {
+      const monthElement = document.createElement('div');
+      monthElement.className = 'month' + (index === birthdayMonth ? ' birthday-zoom' : '');
+      monthElement.innerHTML = `
+        <div class="month-name">${month.name}</div>
+        <img class="month-image" src="${month.image}" alt="${month.name}">
+        ${index === birthdayMonth ? `<p>${userName}, đây là tháng sinh nhật của bạn! 🎉</p>` : ''}
+      `;
+      container.appendChild(monthElement);
+    });
+
+    const monthElements = document.querySelectorAll('.month');
+    let currentIndex = 0;
+
+    function showNextMonth() {
+      if (currentIndex > 0) {
+        monthElements[currentIndex - 1].classList.remove('active');
+      }
+
+      if (currentIndex < monthElements.length) {
+        monthElements[currentIndex].classList.add('active');
+        progressBar.style.width = `${(currentIndex + 1) / monthElements.length * 100}%`;
+
+        updateWeatherEffect(currentIndex);
+        currentIndex++;
+
+        if (currentIndex === birthdayMonth + 1) {
+          setTimeout(() => {
+            window.location.href = 'wish.html';
+          }, 7000);
+          return;
+        }
+
+        setTimeout(showNextMonth, 3000);
+      }
+    }
+
+    skipBtn.addEventListener('click', () => {
+      window.location.href = 'wish.html';
+    });
+
+    setTimeout(showNextMonth, 500);
+
+    // -------------------
+    // Hiệu ứng thời tiết
+    // -------------------
+    let particles = [];
+
+    function updateWeatherEffect(index) {
+      const month = index;
+
+      let type = 'none';
+      if ([11, 0, 1].includes(month)) type = 'snow';
+      else if ([6, 7].includes(month)) type = 'rain';
+      else if ([2, 3, 4].includes(month)) type = 'flower';
+      else if ([8, 9, 10].includes(month)) type = 'leaf';
+
+      createParticles(type);
+    }
+
+    function createParticles(type) {
+      particles = [];
+      const count = 100;
+
+      for (let i = 0; i < count; i++) {
+        const size = Math.random() * 5 + 2;
+        const x = Math.random() * canvas.width;
+        const y = Math.random() * canvas.height;
+        const speed = Math.random() * 2 + 1;
+
+        let color = "white";
+        let shape = "circle";
+
+        if (type === 'snow') {
+          color = "white";
+        } else if (type === 'rain') {
+          color = "#70a1ff";
+          shape = "line";
+        } else if (type === 'leaf') {
+          color = "#f39c12";
+          shape = "leaf";
+        } else if (type === 'flower') {
+          color = "#ff6b81";
+          shape = "circle";
+        }
+
+        particles.push({ x, y, size, speed, color, shape });
+      }
+    }
+
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      particles.forEach(p => {
+        if (p.shape === "circle") {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.fill();
+        } else if (p.shape === "line") {
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(p.x, p.y + p.size * 4);
+          ctx.strokeStyle = p.color;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        } else if (p.shape === "leaf") {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fillStyle = p.color;
+          ctx.fill();
+        }
+
+        p.y += p.speed;
+        if (p.y > canvas.height) {
+          p.y = 0;
+          p.x = Math.random() * canvas.width;
+        }
+      });
+
+      requestAnimationFrame(animate);
+    }
+
+    animate();
+    window.addEventListener('resize', () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+
+    // Phát nhạc nền
+    // Phát nhạc sau khi người dùng có hành động đầu tiên
+    function enableMusic() {
+      const audio = document.getElementById('bgMusic');
+      audio.play().catch(err => {
+        console.log("Không thể tự động phát nhạc:", err.message);
+      });
+      document.removeEventListener('click', enableMusic);
+    }
+    document.addEventListener('click', enableMusic);
+
+  </script>
+</body>
+</html>

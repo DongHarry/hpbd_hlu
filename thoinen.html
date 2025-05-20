@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sinh nhật ảo 🎂</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+      background-color: #fef6e4;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      margin-top: 30px;
+      color: #ff6b6b;
+    }
+    #cake {
+      position: relative;
+      width: 100%;
+      max-width: 600px;
+      margin: 20px auto;
+    }
+    .candle {
+      position: absolute;
+      width: 10px;
+      height: 40px;
+      background: #ffa502;
+      border-radius: 2px;
+    }
+    .flame {
+      width: 10px;
+      height: 15px;
+      background: radial-gradient(circle, yellow 40%, orange 60%, red 80%);
+      border-radius: 50%;
+      position: absolute;
+      top: -18px;
+      left: 0;
+      animation: flicker 0.3s infinite alternate;
+    }
+    @keyframes flicker {
+      0% { transform: scale(1); opacity: 0.8; }
+      100% { transform: scale(1.2); opacity: 1; }
+    }
+    .controls {
+      margin-top: 20px;
+    }
+    #startBtn {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #70a1ff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    #startBtn:hover {
+      background-color: #1e90ff;
+    }
+    .instructions {
+      margin-top: 10px;
+      font-size: 18px;
+      color: #333;
+    }
+    .webcam-section {
+      margin-top: 20px;
+    }
+    video, canvas {
+      width: 100%;
+      max-width: 400px;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
+
+    @media (max-width: 600px) {
+      .candle {
+        height: 30px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🎉 Sinh Nhật Vui Vẻ 🎉</h1>
+  <div id="cake"></div>
+
+  <div class="controls">
+    <button id="startBtn">Bắt đầu 🎤🎥</button>
+    <p class="instructions">Thổi vào micro để tắt nến 🎂</p>
+    <p id="statusMessage" class="instructions"></p>
+  </div>
+
+  <div class="webcam-section">
+    <video id="webcam" autoplay muted playsinline></video>
+    <canvas id="blowCanvas" width="400" height="300" style="visibility: hidden; position: absolute; left: -9999px;"></canvas>
+  </div>
+
+  <script>
+    const cake = document.getElementById('cake');
+    const webcamElement = document.getElementById('webcam');
+    const blowCanvas = document.getElementById('blowCanvas');
+    const blowContext = blowCanvas.getContext('2d');
+    const statusMessage = document.getElementById('statusMessage');
+    const startBtn = document.getElementById('startBtn');
+
+    const candleCount = 5;
+    const candles = [];
+
+    let isBlowing = false;
+    let blowStartTime = null;
+    const blowThreshold = 1.5;
+
+    // Tạo nến
+    function createCandles() {
+      cake.innerHTML = '';
+      for (let i = 0; i < candleCount; i++) {
+        const candle = document.createElement('div');
+        candle.className = 'candle';
+        candle.style.left = `${20 + i * 60}px`;
+        const flame = document.createElement('div');
+        flame.className = 'flame';
+        candle.appendChild(flame);
+        cake.appendChild(candle);
+        candles.push({ element: candle, flame, isLit: true });
+      }
+    }
+
+    // Tắt ngẫu nhiên 1 cây nến
+    function blowOutCandle(index) {
+      if (candles[index] && candles[index].isLit) {
+        candles[index].flame.remove();
+        candles[index].isLit = false;
+        updateStatus(`Đã tắt nến số ${index + 1}! 🎉`);
+      }
+    }
+
+    function updateStatus(msg) {
+      statusMessage.textContent = msg;
+    }
+
+    // Phát hiện thổi
+    function detectBlowing(stream) {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const analyser = audioContext.createAnalyser();
+
+      if (stream.getAudioTracks().length === 0) {
+        updateStatus("Không phát hiện được micro.");
+        return;
+      }
+
+      const microphone = audioContext.createMediaStreamSource(stream);
+      microphone.connect(analyser);
+      analyser.fftSize = 256;
+      const bufferLength = analyser.frequencyBinCount;
+      const dataArray = new Uint8Array(bufferLength);
+
+      let lastFrame = null;
+
+      function check() {
+        analyser.getByteFrequencyData(dataArray);
+        let sum = 0;
+        for (let i = 0; i < bufferLength; i++) sum += dataArray[i];
+        const average = sum / bufferLength;
+
+        blowContext.drawImage(webcamElement, 0, 0, blowCanvas.width, blowCanvas.height);
+        const currentFrame = blowContext.getImageData(0, 0, blowCanvas.width, blowCanvas.height);
+
+        let diff = 0;
+        if (lastFrame) {
+          for (let i = 0; i < currentFrame.data.length; i += 4) {
+            diff += Math.abs(currentFrame.data[i] - lastFrame.data[i]);
+          }
+          diff /= (currentFrame.data.length / 4);
+        }
+
+        const isLoud = average > 35;
+        const isMotion = diff > 20;
+
+        if (isLoud || isMotion) {
+          updateStatus('Đang thổi...');
+          if (!isBlowing) {
+            isBlowing = true;
+            blowStartTime = Date.now();
+          } else {
+            const duration = (Date.now() - blowStartTime) / 1000;
+            if (duration >= blowThreshold) {
+              const lit = candles.filter(c => c.isLit);
+              if (lit.length > 0) {
+                const index = candles.indexOf(lit[Math.floor(Math.random() * lit.length)]);
+                blowOutCandle(index);
+              }
+              isBlowing = false;
+            }
+          }
+        } else {
+          isBlowing = false;
+          updateStatus('Hãy thổi vào micro để tắt nến...');
+        }
+
+        lastFrame = currentFrame;
+        requestAnimationFrame(check);
+      }
+
+      check();
+    }
+
+    // Bắt đầu
+    startBtn.addEventListener('click', async () => {
+      createCandles();
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+        webcamElement.srcObject = stream;
+        updateStatus('Đang lắng nghe...');
+        detectBlowing(stream);
+      } catch (err) {
+        updateStatus('Không truy cập được webcam hoặc micro.');
+        console.error(err);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Do not ask why</title>
+    <link rel="shortcut icon" href="show/icon.png" type="image/x-icon">
+    <link rel="stylesheet" href="show/main.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script&display=swap" rel="stylesheet">
+</head>
+<body>
+    
+    <div id="drag-container">
+        <div id="spin-container">
+          <!-- <img src="./img/anh1.jpg" alt=""> -->
+          <img src="./img/anh10.jpg" alt="">
+          <!-- <img src="./img/anh11.jpg" alt=""> -->
+          <img src="./img/anh12.jpg" alt="">
+          <img src="./img/anh4.jpg" alt="">
+          <img src="./img/anh3.jpg" alt="">
+          <img src="./img/anh6.jpg" alt="">
+          <img src="./img/anh8.jpg" alt="">
+          <img src="./img/anh7.jpg" alt="">
+          <img src="./img/anh9.jpg" alt="">
+          <img src="./img/anh2.jpg" alt="">
+          <img src="./img/anh5.jpg" alt="">
+          
+            <p>My love</p>
+          
+        
+        </div>
+        <div id="ground"></div>
+      </div>
+      
+      <div id="music-container"></div>
+      <div id="canva">
+      <canvas id="canvas"></canvas>
+    </div>
+
+    <audio id="bgMusic" src="music/high_low.mp3" loop></audio>
+
+    <script src="show/main.js"></script>
+    <script>
+    // Phát nhạc nền
+    // Phát nhạc sau khi người dùng có hành động đầu tiên
+    function enableMusic() {
+      const audio = document.getElementById('bgMusic');
+      audio.play().catch(err => {
+        console.log("Không thể tự động phát nhạc:", err.message);
+      });
+      document.removeEventListener('click', enableMusic);
+    }
+    document.addEventListener('click', enableMusic);
+    </script>
+</body>
+</html>

@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Album Ảnh Sinh Nhật</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Montserrat:wght@400;600&display=swap');
+        
+        :root {
+            --primary: #ff6b6b;
+            --secondary: #4ecdc4;
+            --accent: #ffe66d;
+            --dark: #2d3436;
+            --light: #f7f1e3;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            color: var(--dark);
+            overflow-x: hidden;
+        }
+        
+        header {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        h1 {
+            font-family: 'Dancing Script', cursive;
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .header-decoration {
+            position: absolute;
+            font-size: 5rem;
+            opacity: 0.1;
+            z-index: 1;
+        }
+        
+        .decoration-1 { top: 10px; left: 20px; }
+        .decoration-2 { bottom: 10px; right: 20px; }
+        
+        .gallery-container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+        
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 1rem;
+        }
+        
+        .photo-card {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            aspect-ratio: 1/1;
+            cursor: pointer;
+        }
+        
+        .photo-card:hover {
+            transform: translateY(-10px) scale(1.03);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+        
+        .photo-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: all 0.5s ease;
+        }
+        
+        .photo-card:hover img {
+            transform: scale(1.1);
+        }
+        
+        .photo-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            color: white;
+            padding: 1.5rem 1rem 1rem;
+            transform: translateY(100%);
+            transition: all 0.3s ease;
+        }
+        
+        .photo-card:hover .photo-caption {
+            transform: translateY(0);
+        }
+        
+        .photo-caption h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+        
+        /* Hiệu ứng đặc biệt */
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .rotate {
+            animation: rotate 10s linear infinite;
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .pulse {
+            animation: pulse 2s ease infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        /* Lightbox */
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        
+        .lightbox.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .lightbox-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+        }
+        
+        .lightbox-content img {
+            max-width: 100%;
+            max-height: 90vh;
+            border-radius: 5px;
+            box-shadow: 0 0 20px rgba(255,255,255,0.3);
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+        }
+        
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            background: rgba(0,0,0,0.5);
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        
+        .prev-btn { left: 20px; }
+        .next-btn { right: 20px; }
+        
+        /* Confetti */
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: var(--accent);
+            opacity: 0;
+            z-index: 999;
+            animation: confettiFall 5s linear forwards;
+        }
+        
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        footer {
+            text-align: center;
+            padding: 2rem;
+            background-color: var(--dark);
+            color: white;
+        }
+        
+        .heart {
+            color: var(--primary);
+            animation: pulse 1s infinite;
+            display: inline-block;
+        }
+
+        /* Thêm style cho counter */
+        .click-counter {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            z-index: 1001;
+            display: none;
+        }
+        
+        .click-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 107, 107, 0.9);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 1.5rem;
+            z-index: 1002;
+            text-align: center;
+            display: none;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-decoration decoration-1">🎂</div>
+        <div class="header-decoration decoration-2 rotate">🎉</div>
+        <h1 class="floating">Album Sinh Nhật Đáng Nhớ</h1>
+        <p>Những khoảnh khắc tuyệt vời nhất của bạn</p>
+    </header>
+    
+    <div class="gallery-container">
+        <div class="gallery">
+            <!-- Ảnh 1 -->
+            <div class="photo-card pulse" data-id="1">
+                <img src="img/hlu1.jpg" alt="Khoảnh khắc vui vẻ">
+                <div class="photo-caption">
+                    <h3>Khoảnh khắc vui vẻ</h3>
+                    <p>Ngày bạn cười tươi nhất</p>
+                </div>
+            </div>
+            
+            <!-- Ảnh 2 -->
+            <div class="photo-card" data-id="2">
+                <img src="img/hlu2.jpg" alt="Bữa tiệc bất ngờ">
+                <div class="photo-caption">
+                    <h3>Bữa tiệc bất ngờ</h3>
+                    <p>Khi bạn được tặng quà</p>
+                </div>
+            </div>
+            
+            <!-- Ảnh 3 -->
+            <div class="photo-card floating" data-id="3">
+                <img src="img/anh12.jpg" alt="Thổi nến">
+                <div class="photo-caption">
+                    <h3>Thổi nến</h3>
+                    <p>Ước nguyện điều tốt đẹp nhất</p>
+                </div>
+            </div>
+            
+            <!-- Ảnh 4 -->
+            <div class="photo-card" data-id="4">
+                <img src="img/anh11.jpg" alt="Chụp ảnh cùng bạn bè">
+                <div class="photo-caption">
+                    <h3>Chụp ảnh cùng bạn bè</h3>
+                    <p>Những người bạn tuyệt vời</p>
+                </div>
+            </div>
+            
+            <!-- Ảnh 5 -->
+            <div class="photo-card rotate" data-id="5">
+                <img src="img/banh_sinh_nhat.png" alt="Bánh sinh nhật">
+                <div class="photo-caption">
+                    <h3>Bánh sinh nhật</h3>
+                    <p>Chiếc bánh đẹp nhất</p>
+                </div>
+            </div>
+            
+            <!-- Ảnh 6 -->
+            <div class="photo-card pulse" data-id="6">
+                <img src="img/hlu2.jpg" alt="Kỷ niệm đáng nhớ">
+                <div class="photo-caption">
+                    <h3>Kỷ niệm đáng nhớ</h3>
+                    <p>Khoảnh khắc không thể quên</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox">
+        <div class="lightbox-content">
+            <span class="close-btn">&times;</span>
+            <img id="lightbox-img" src="" alt="">
+            <div class="nav-btn prev-btn">&#10094;</div>
+            <div class="nav-btn next-btn">&#10095;</div>
+        </div>
+    </div>
+    
+    <footer>
+        <p>Made with <span class="heart">❤</span> for your special day</p>
+        <p>© 2025 Album Sinh Nhật</p>
+    </footer>
+
+
+    <!-- Thêm counter và thông báo -->
+    <div class="click-counter" id="clickCounter">0</div>
+    <div class="click-message" id="clickMessage">
+        <p>Bạn đã click đủ 5 lần!</p>
+        <p>Chuyển trang trong 3 giây...</p>
+    </div>
+
+     <audio id="bgMusic" src="music/bright.mp3" loop></audio>
+    
+    <script>
+        // Phát nhạc nền
+        // Phát nhạc sau khi người dùng có hành động đầu tiên
+        function enableMusic() {
+        const audio = document.getElementById('bgMusic');
+        audio.play().catch(err => {
+            console.log("Không thể tự động phát nhạc:", err.message);
+        });
+        document.removeEventListener('click', enableMusic);
+        }
+        document.addEventListener('click', enableMusic);
+
+        // Lightbox functionality
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const closeBtn = document.querySelector('.close-btn');
+        const prevBtn = document.querySelector('.prev-btn');
+        const nextBtn = document.querySelector('.next-btn');
+        const photoCards = document.querySelectorAll('.photo-card');
+        
+        let currentIndex = 0;
+        
+        // Mở lightbox
+        photoCards.forEach((card, index) => {
+            card.addEventListener('click', () => {
+                currentIndex = index;
+                const imgSrc = card.querySelector('img').src;
+                lightboxImg.src = imgSrc;
+                lightbox.classList.add('active');
+                createConfetti();
+            });
+        });
+        
+        // Đóng lightbox
+        closeBtn.addEventListener('click', () => {
+            lightbox.classList.remove('active');
+        });
+        
+        // Lightbox click outside
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) {
+                lightbox.classList.remove('active');
+            }
+        });
+        
+        // Navigation
+        prevBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            navigate(-1);
+        });
+        
+        nextBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            navigate(1);
+        });
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (lightbox.classList.contains('active')) {
+                if (e.key === 'ArrowLeft') {
+                    navigate(-1);
+                } else if (e.key === 'ArrowRight') {
+                    navigate(1);
+                } else if (e.key === 'Escape') {
+                    lightbox.classList.remove('active');
+                }
+            }
+        });
+        
+        function navigate(direction) {
+            currentIndex += direction;
+            
+            if (currentIndex < 0) {
+                currentIndex = photoCards.length - 1;
+            } else if (currentIndex >= photoCards.length) {
+                currentIndex = 0;
+            }
+            
+            const imgSrc = photoCards[currentIndex].querySelector('img').src;
+            lightboxImg.src = imgSrc;
+            createConfetti();
+        }
+
+
+        // Thêm tính năng đếm click
+        let clickCount = 0;
+        const clickCounter = document.getElementById('clickCounter');
+        const clickMessage = document.getElementById('clickMessage');
+        
+        // Bắt sự kiện click toàn bộ trang
+        document.body.addEventListener('click', function(e) {
+            // Không đếm khi click vào lightbox hoặc các nút điều hướng
+            if (e.target.closest('.lightbox') || 
+                e.target.closest('.nav-btn') || 
+                e.target.closest('.close-btn')) {
+                return;
+            }
+            
+            clickCount++;
+            updateClickCounter();
+            
+            if (clickCount === 5) {
+                showClickMessage();
+                // Chuyển trang sau 3 giây
+                setTimeout(() => {
+                    window.location.href = 'show.html'; // Thay đổi URL đích tại đây
+                }, 3000);
+            }
+        });
+        
+        function updateClickCounter() {
+            clickCounter.textContent = clickCount;
+            clickCounter.style.display = 'block';
+            
+            // Hiệu ứng nhấp nháy
+            clickCounter.style.animation = 'none';
+            void clickCounter.offsetWidth; // Trigger reflow
+            clickCounter.style.animation = 'pulse 0.5s';
+            
+            // Ẩn counter sau 2 giây
+            setTimeout(() => {
+                clickCounter.style.display = 'none';
+            }, 2000);
+        }
+        
+        function showClickMessage() {
+            clickMessage.style.display = 'block';
+            
+            // Hiệu ứng confetti đặc biệt
+            for (let i = 0; i < 100; i++) {
+                setTimeout(() => {
+                    createConfetti();
+                }, i * 100);
+            }
+        }
+        
+        // Tạo hiệu ứng confetti
+        function createConfetti() {
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                
+                // Random màu sắc
+                const colors = ['#ff6b6b', '#4ecdc4', '#ffe66d', '#74b9ff', '#a29bfe', '#fd79a8'];
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                // Random kích thước
+                const size = Math.random() * 10 + 5;
+                confetti.style.width = `${size}px`;
+                confetti.style.height = `${size}px`;
+                
+                // Random vị trí
+                confetti.style.left = `${Math.random() * 100}vw`;
+                
+                // Random thời gian rơi
+                confetti.style.animationDuration = `${Math.random() * 3 + 2}s`;
+                
+                document.body.appendChild(confetti);
+                
+                // Tự động xóa sau khi animation kết thúc
+                setTimeout(() => {
+                    confetti.remove();
+                }, 5000);
+            }
+        }
+        
+        // Hiệu ứng khi cuộn trang
+        window.addEventListener('scroll', () => {
+            const scrollPosition = window.scrollY;
+            const header = document.querySelector('header');
+            
+            if (scrollPosition > 50) {
+                header.style.transform = `translateY(-${scrollPosition / 5}px)`;
+            }
+        });
+    </script>
+</body>
+</html>
