@@ -77,6 +77,11 @@
             display: none;
             animation: slideIn 0.5s, fadeOut 0.5s 2.5s forwards;
         }
+
+        .error-notification {
+            background-color: #ff6b6b;
+            animation: slideIn 0.5s, fadeOut 0.5s 2.5s forwards;
+        }
         
         @keyframes slideIn {
             from {top: -50px; opacity: 0;}
@@ -103,41 +108,54 @@
         <div class="birthday-icon">🎂</div>
         <h1>Chúc Mừng Sinh Nhật</h1>
         <form id="loginForm">
-            <input type="text" placeholder="Tên của bạn" required>
-            <input type="date" placeholder="Ngày sinh của bạn" required>
+            <input type="text" id="nameInput" placeholder="Tên của bạn" required>
+            <input type="date" id="birthdayInput" placeholder="Ngày sinh của bạn" required>
             <button type="submit">Bắt đầu</button>
         </form>
     </div>
 
     <!-- Thông báo -->
-    <div class="notification" id="notification">Chúc mừng sinh nhật! 🎉
-       
-    </div>
+    <div class="notification" id="notification"></div>
 
     <script>
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const name = this.querySelector('input[type="text"]').value;
+            const name = this.querySelector('input[type="text"]').value.trim();
             const birthday = this.querySelector('input[type="date"]').value;
             
-            // Hiển thị thông báo
-            showNotification(`Xin chào ${name}! Chúc ${name} một sinh nhật tuyệt vời! 🎂`);
+            // Kiểm tra tên và ngày sinh
+            const correctName = "Hồng Nụ";
+            const correctBirthday = "2001-07-11"; // Định dạng YYYY-MM-DD của input date
             
-            // Tạo hiệu ứng confetti
-            createConfetti();
-            
-            // Lưu thông tin và chuyển đến màn hình chính sau 3 giây
-            setTimeout(() => {
-                localStorage.setItem('userName', name);
-                localStorage.setItem('birthday', birthday);
-                window.location.href = 'branch/main.html'; // Chuyển đến trang chính
-            }, 3000);
+            if (name === correctName && birthday === correctBirthday) {
+                // Hiển thị thông báo thành công
+                showNotification(`Xin chào ${name}! Chúc ${name} một sinh nhật tuyệt vời! 🎂`, false);
+                
+                // Tạo hiệu ứng confetti
+                createConfetti();
+                
+                // Lưu thông tin và chuyển đến màn hình chính sau 3 giây
+                setTimeout(() => {
+                    localStorage.setItem('userName', name);
+                    localStorage.setItem('birthday', birthday);
+                    window.location.href = 'branch/main.html'; // Chuyển đến trang chính
+                }, 3000);
+            } else {
+                // Hiển thị thông báo lỗi
+                showNotification("Thông tin không chính xác. Vui lòng kiểm tra lại!", true);
+            }
         });
         
-        function showNotification(message) {
+        function showNotification(message, isError) {
             const notification = document.getElementById('notification');
             notification.textContent = message;
             notification.style.display = 'block';
+            
+            if (isError) {
+                notification.classList.add('error-notification');
+            } else {
+                notification.classList.remove('error-notification');
+            }
             
             // Reset animation
             notification.style.animation = 'none';

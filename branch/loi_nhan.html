@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lời Nhắn Yêu Thương Rơi Trong Vũ Trụ</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background: linear-gradient(to bottom, #000000, #0a0020, #000033);
+            height: 100vh;
+            font-family: 'Arial', sans-serif;
+        }
+
+        .universe {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .star {
+            position: absolute;
+            background-color: #fff;
+            border-radius: 50%;
+            animation: twinkle var(--duration) infinite ease-in-out;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        .love-message {
+            position: absolute;
+            color: white;
+            font-size: 1.5em;
+            text-shadow: 0 0 10px #ff69b4;
+            opacity: 0;
+            animation: fall linear infinite;
+            text-align: center;
+            width: 100%;
+            z-index: 2;
+            padding: 10px 0;
+        }
+
+        @keyframes fall {
+            0% {
+                transform: translateY(-100px);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(calc(100vh + 100px));
+                opacity: 0;
+            }
+        }
+
+        .heart {
+            color: #ff69b4;
+            animation: heartbeat 1.5s infinite;
+            display: inline-block;
+        }
+
+        @keyframes heartbeat {
+            0% { transform: scale(1); }
+            25% { transform: scale(1.2); }
+            50% { transform: scale(1); }
+            75% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="universe" id="universe"></div>
+    <audio id="bgMusic" src="../music/âm_thầm_bên_em.mp3"></audio>
+    <script>
+        // Tạo các ngôi sao
+        const universe = document.getElementById('universe');
+        const starCount = 400;
+        
+        for (let i = 0; i < starCount; i++) {
+            const star = document.createElement('div');
+            star.classList.add('star');
+            
+            // Kích thước ngẫu nhiên
+            const size = Math.random() * 3;
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+            
+            // Vị trí ngẫu nhiên
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.top = `${Math.random() * 100}%`;
+            
+            // Thời gian twinkle ngẫu nhiên
+            star.style.setProperty('--duration', `${2 + Math.random() * 3}s`);
+            
+            // Độ sáng ngẫu nhiên
+            star.style.opacity = Math.random() * 0.8 + 0.2;
+            
+            universe.appendChild(star);
+        }
+
+        // Danh sách các lời nhắn yêu thương
+        const loveMessages = [
+            "Chúc mừng sinh nhật Hồng Nụ <span class='heart'>❤</span>",
+            "Sao băng đang rơi kìa, ước đi Hlu ơi",
+            "Sinh nhật vui vẻ Hlu nhé <span class='heart'>❤</span>",
+            "Chờ một phút nhé <span class='heart'>❤</span>",
+            "Người đẹp nhất thế gian, he~",
+            "Đừng lo nghĩ nhiều nhé",
+            "Kị sĩ của Hlu, hehe <span class='heart'>❤</span>",
+            "Mệt quá thì quay lại nhìn nha",
+            "Chờ một phút nhé <span class='heart'>❤</span>"
+        ];
+
+        // Tạo lời nhắn rơi xuống thẳng đứng
+        function createFallingMessage() {
+            const message = document.createElement('div');
+            message.classList.add('love-message');
+            
+            // Chọn ngẫu nhiên một lời nhắn
+            const randomMessage = loveMessages[Math.floor(Math.random() * loveMessages.length)];
+            message.innerHTML = randomMessage;
+            
+            // Căn giữa theo chiều ngang
+            message.style.left = "0";
+            
+            // Thời gian rơi ngẫu nhiên (12-18 giây)
+            const duration = 12000 + Math.random() * 6000;
+            message.style.animationDuration = `${duration}ms`;
+            
+            // Kích thước ngẫu nhiên
+            const size = 1.2 + Math.random() * 0.8;
+            message.style.fontSize = `${size}em`;
+            
+            // Màu sắc ngẫu nhiên (trắng, hồng nhạt, vàng nhạt)
+            const colors = ["#ffffff", "#ffb6c1", "#ffff99"];
+            message.style.color = colors[Math.floor(Math.random() * colors.length)];
+            
+            universe.appendChild(message);
+            
+            // Xóa message sau khi rơi xong
+            setTimeout(() => {
+                message.remove();
+            }, duration);
+        }
+
+        // Tạo sao băng ngang
+        function createShootingStar() {
+            const shootingStar = document.createElement('div');
+            shootingStar.classList.add('star');
+            shootingStar.style.width = '4px';
+            shootingStar.style.height = '4px';
+            shootingStar.style.borderRadius = '50%';
+            shootingStar.style.background = 'linear-gradient(to right, transparent, white)';
+            shootingStar.style.boxShadow = '0 0 15px 2px white';
+            
+            const startX = Math.random() * 100;
+            const startY = Math.random() * 30;
+            
+            shootingStar.style.left = `${startX}%`;
+            shootingStar.style.top = `${startY}%`;
+            
+            universe.appendChild(shootingStar);
+            
+            const animation = shootingStar.animate([
+                { 
+                    transform: 'translate(0, 0)',
+                    opacity: 0
+                },
+                { 
+                    transform: `translate(${200 + Math.random() * 100}px, ${100 + Math.random() * 50}px)`,
+                    opacity: 1
+                },
+                { 
+                    transform: `translate(${400 + Math.random() * 200}px, ${200 + Math.random() * 100}px)`,
+                    opacity: 0
+                }
+            ], {
+                duration: 1500 + Math.random() * 1500,
+                easing: 'linear'
+            });
+            
+            animation.onfinish = () => {
+                shootingStar.remove();
+            };
+        }
+
+        // Tạo lời nhắn mới mỗi 1.5-2.5 giây
+        setInterval(createFallingMessage, 1500 + Math.random() * 1000);
+        
+        // Tạo sao băng mỗi 3-5 giây
+        setInterval(createShootingStar, 3000 + Math.random() * 2000);
+        
+        // Tạo ngay 3 lời nhắn khi trang load
+        for (let i = 0; i < 3; i++) {
+            setTimeout(createFallingMessage, i * 800);
+        }
+
+        // Phát nhạc nền
+        // Phát nhạc sau khi người dùng có hành động đầu tiên
+        function enableMusic() {
+        const audio = document.getElementById('bgMusic');
+        audio.play().catch(err => {
+            console.log("Không thể tự động phát nhạc:", err.message);
+        });
+        document.removeEventListener('click', enableMusic);
+        }
+        document.addEventListener('click', enableMusic);
+
+        // Tự động chuyển trang sau 1 phút (60000 milliseconds)
+        setTimeout(() => {
+            window.location.href = "show.html"; // Thay bằng URL trang bạn muốn chuyển đến
+        }, 90000);
+    </script>
+    
+</body>
+</html>

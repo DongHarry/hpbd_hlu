@@ -11,6 +11,111 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script&display=swap" rel="stylesheet">
 </head>
+
+<style>
+  /* CSS cho button và modal */
+  #love-box-btn {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #ff69b4;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-family: 'Dancing Script', cursive;
+    font-size: 1.5em;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(255, 105, 180, 0.7);
+    z-index: 100;
+    opacity: 0.8;
+    transition: all 0.3s;
+  }
+  
+  #love-box-btn:hover {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.05);
+  }
+  
+  /* Modal styles */
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+  }
+  
+  .modal-content {
+    background-color: #fff0f5;
+    margin: 10% auto;
+    padding: 20px;
+    border-radius: 10px;
+    width: 80%;
+    max-width: 500px;
+    box-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
+    font-family: 'Dancing Script', cursive;
+    text-align: center;
+  }
+  
+  .modal-content h2 {
+    color: #ff69b4;
+    margin-bottom: 20px;
+  }
+  
+  .close {
+    color: #ff69b4;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  
+  .close:hover {
+    color: #ff1493;
+  }
+  
+  #love-messages {
+    margin-top: 20px;
+    padding: 10px;
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  
+  .message-item {
+    background-color: #fff;
+    padding: 15px;
+    margin: 15px 0;
+    border-radius: 10px;
+    border-left: 4px solid #ff69b4;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    font-size: 1.2em;
+    text-align: left;
+    position: relative;
+  }
+  
+  .message-item:before {
+    content: '"';
+    font-size: 2em;
+    color: #ffb6c1;
+    position: absolute;
+    left: 5px;
+    top: 5px;
+  }
+  
+  .message-item:after {
+    content: '"';
+    font-size: 2em;
+    color: #ffb6c1;
+    position: absolute;
+    right: 5px;
+    bottom: -10px;
+  }
+</style>
 <body>
     
     <div id="drag-container">
@@ -30,9 +135,19 @@
           
             <p>My love</p>
           
-        
         </div>
+
         <div id="ground"></div>
+      </div>
+
+      <div id="love-box-modal" class="modal">
+          <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Gửi Hlụ yêu dấu</h2>
+            <div id="love-messages">
+              <!-- Các lời nhắn sẽ được hiển thị ở đây -->
+            </div>
+          </div>
       </div>
       
       <div id="music-container"></div>
@@ -40,20 +155,97 @@
       <canvas id="canvas"></canvas>
     </div>
 
-    <audio id="bgMusic" src="../music/high_low.mp3" loop></audio>
+    <audio id="bgMusic" src="../music/mình_yêu_từ_bao_giờ.mp3" loop></audio>
 
     <script src="../show/main.js"></script>
     <script>
-    // Phát nhạc nền
-    // Phát nhạc sau khi người dùng có hành động đầu tiên
-    function enableMusic() {
-      const audio = document.getElementById('bgMusic');
-      audio.play().catch(err => {
-        console.log("Không thể tự động phát nhạc:", err.message);
-      });
-      document.removeEventListener('click', enableMusic);
+      // Phát nhạc nền
+      // Phát nhạc sau khi người dùng có hành động đầu tiên
+      function enableMusic() {
+        const audio = document.getElementById('bgMusic');
+        audio.play().catch(err => {
+          console.log("Không thể tự động phát nhạc:", err.message);
+        });
+        document.removeEventListener('click', enableMusic);
+      }
+      document.addEventListener('click', enableMusic);
+
+
+      // Danh sách các lời nhắn đã được định nghĩa sẵn
+  const predefinedMessages = [
+    "Tình cờ gặp gỡ trên con đường vắng người, tình cờ gặp gỡ giữa hàng vạn người, hàng triệu người. Cuộc sống này thật kì diệu, nếu chẳng phải phép màu vậy sao chúng ta gặp nhau ??",
+    "Gặp được nhau là có duyên, cùng đi chung với nhau một khoảng thời gian là may mắn, dù kết quả không như mong đợi nhưng khoảng thời gian đó là khoảng thời gian rất vui, khiến mình chỉ muốn sống mãi ở khoảng thời gian đó",
+    "Nhưng cuộc vui nào rồi cũng đến lúc tàn, cuộc vui nào rồi cũng đến lúc phải nói lời tạm biệt. Dù có tiếc nuối, dù có đau lòng thì cuộc sống vẫn cứ tiếp diễn, thời gian vẫn cứ trôi đi. Chỉ mong rằng những kỉ niệm đẹp sẽ mãi ở trong tim mình, và mình sẽ luôn nhớ về khoảng thời gian đó với nụ cười trên môi.",
+    "Đức Anh tuy thiếu sót nhiều nhưng mọi thứ Đức Anh cho đi là thật lòng, là những gì tốt đẹp nhất mà Đức Anh có",
+    "Cùng nhau đi đến cuối con đường nhé",
+    "Yêu em từ cái nhìn đầu tiên",
+    "Em làm cuộc sống của anh ý nghĩa hơn",
+    "Mãi bên nhau em nhé ❤️",
+    "Anh sẽ luôn là điểm tựa cho em",
+    "Hạnh phúc là được thấy em cười mỗi ngày",
+    "Em là điều tuyệt vời nhất xảy đến với anh",
+    "Tình yêu của anh dành cho em là vô điều kiện",
+    "Xin lỗi Hlụ vì đã làm phiền Hlụ",
+    "Mong rằng Hlụ luôn luôn vui vẻ và hạnh phúc",
+    "Mong rằng mỗi ngày được nhìn thấy Hlụ, được thấy Hlụ cười, được nghe tiếng của Hlụ thì cuộc sống này có thêm một điều tuyệt vời 🥰",
+  ];
+
+  // Tạo button hộp thư
+  const loveBoxBtn = document.createElement('button');
+  loveBoxBtn.id = 'love-box-btn';
+  loveBoxBtn.textContent = 'Bạn có thư nè';
+  document.getElementById('spin-container').appendChild(loveBoxBtn);
+  
+  // Lấy các phần tử modal
+  const modal = document.getElementById('love-box-modal');
+  const btn = document.getElementById('love-box-btn');
+  const span = document.getElementsByClassName('close')[0];
+  const loveMessagesContainer = document.getElementById('love-messages');
+  
+  // Mở modal khi click vào button
+  btn.onclick = function() {
+    modal.style.display = 'block';
+    showMessages();
+  }
+  
+  // Đóng modal khi click vào nút đóng
+  span.onclick = function() {
+    modal.style.display = 'none';
+  }
+  
+  // Đóng modal khi click ra ngoài
+  window.onclick = function(event) {
+    if (event.target == modal) {
+      modal.style.display = 'none';
     }
-    document.addEventListener('click', enableMusic);
+  }
+  
+  // Hiển thị các lời nhắn đã định nghĩa
+  function showMessages() {
+    loveMessagesContainer.innerHTML = '';
+    
+    predefinedMessages.forEach((msg, index) => {
+      const messageItem = document.createElement('div');
+      messageItem.className = 'message-item';
+      messageItem.innerHTML = msg;
+      
+      // Thêm hiệu ứng xuất hiện tuần tự
+      messageItem.style.animation = `fadeIn 0.5s ease ${index * 0.1}s forwards`;
+      messageItem.style.opacity = '0';
+      
+      loveMessagesContainer.appendChild(messageItem);
+    });
+  }
+
+  // Thêm animation vào style
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  `;
+  document.head.appendChild(style);
     </script>
 </body>
 </html>
